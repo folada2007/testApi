@@ -1,0 +1,209 @@
+basePath: /
+definitions:
+  model.User:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      id:
+        type: integer
+      nationality:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+  public_dto.Errors:
+    properties:
+      error_massage:
+        type: string
+      errors_type:
+        type: string
+    type: object
+  public_dto.NewUserData:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      name:
+        type: string
+      nationality:
+        type: string
+      surname:
+        type: string
+    type: object
+  public_dto.PagedUsers:
+    properties:
+      page:
+        description: Текущая страница
+        type: integer
+      pageSize:
+        description: Размер страницы
+        type: integer
+      total:
+        description: Общее количество пользователей
+        type: integer
+      totalPages:
+        description: Общее количество страниц
+        type: integer
+      users:
+        description: Список пользователей
+        items:
+          $ref: '#/definitions/model.User'
+        type: array
+    type: object
+  public_dto.ResponseError:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/public_dto.Errors'
+        type: array
+    type: object
+  public_dto.UserRegistration:
+    description: DTO для регистрации нового пользователя
+    properties:
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: CRUD api
+  title: TestAPI
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список пользователей с фильтрацией и пагинацией
+      parameters:
+      - description: Имя
+        in: query
+        name: username
+        type: string
+      - description: Фамилия
+        in: query
+        name: surname
+        type: string
+      - description: Национальность
+        in: query
+        name: nationality
+        type: string
+      - description: Гендер
+        in: query
+        name: gender
+        type: string
+      - description: возраст
+        in: query
+        name: age
+        type: integer
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: размер страницы
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/public_dto.PagedUsers'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/public_dto.ResponseError'
+      summary: Получить отфильтрованных пользователей
+      tags:
+      - users
+  /DeleteUser/{id}:
+    delete:
+      description: Удаляет пользователя по ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно удален!
+          schema:
+            type: string
+        "400":
+          description: Ошибка удаления пользователя или неверный ID
+          schema:
+            $ref: '#/definitions/public_dto.ResponseError'
+      summary: Удалить пользователя
+      tags:
+      - users
+  /PostUserName:
+    post:
+      consumes:
+      - application/json
+      description: Принимает имя, фамилию и запрашивает определённые данные из внешних
+        API (возраст, национальность, пол).Сохраняет результат в БД
+      parameters:
+      - description: Данные для регистрации пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/public_dto.UserRegistration'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь успешно создан!
+          schema:
+            type: string
+        "400":
+          description: Ошибка валидации или получения данных
+          schema:
+            $ref: '#/definitions/public_dto.ResponseError'
+      summary: Создать нового пользователя
+      tags:
+      - users
+  /UpdateUser/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные пользователя по ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/public_dto.NewUserData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные успешно обновлены!
+          schema:
+            type: string
+        "400":
+          description: Ошибка обновления или неверные данные
+          schema:
+            $ref: '#/definitions/public_dto.ResponseError'
+      summary: Обновить данные пользователя
+      tags:
+      - users
+swagger: "2.0"
